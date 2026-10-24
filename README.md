@@ -9,11 +9,24 @@ Links Java tests to [OpenSpec](https://github.com/Fission-AI/OpenSpec) scenarios
 
 ## Installation
 
-The annotation is on Maven Central:
+The annotation is on Maven Central. Gradle:
 
 ```kotlin
 testImplementation("org.kleinb.openspec:spec-anchor-annotations:0.0.1")
 ```
+
+Maven:
+
+```xml
+<dependency>
+    <groupId>org.kleinb.openspec</groupId>
+    <artifactId>spec-anchor-annotations</artifactId>
+    <version>0.0.1</version>
+    <scope>test</scope>
+</dependency>
+```
+
+The IntelliJ plugin (IntelliJ IDEA 2025.2 or later) is not on the JetBrains Marketplace yet. Download `spec-anchor-intellij-plugin-<version>.zip` from the [GitHub releases](https://github.com/seakayone/spec-anchor/releases), then in IntelliJ go to *Settings → Plugins → ⚙ → Install Plugin from Disk…*, pick the zip and restart the IDE if asked.
 
 ## Linking a test to a scenario
 

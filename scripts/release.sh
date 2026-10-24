@@ -98,7 +98,8 @@ if ! $dry_run; then
 fi
 
 echo "$version" > version.txt
-sed -i.bak -E "s/(spec-anchor-annotations:)[0-9]+\.[0-9]+\.[0-9]+/\1$version/" README.md
+sed -i.bak -E -e "s/(spec-anchor-annotations:)[0-9]+\.[0-9]+\.[0-9]+/\1$version/" \
+  -e "s#<version>[0-9]+\.[0-9]+\.[0-9]+</version>#<version>$version</version>#" README.md
 rm -f README.md.bak
 
 ./gradlew clean build
