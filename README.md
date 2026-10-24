@@ -12,7 +12,7 @@ Links Java tests to [OpenSpec](https://github.com/Fission-AI/OpenSpec) scenarios
 The annotation is on Maven Central:
 
 ```kotlin
-testImplementation("org.kleinb.openspec:spec-anchor-annotations:0.0.0")
+testImplementation("org.kleinb.openspec:spec-anchor-annotations:0.0.1")
 ```
 
 ## Linking a test to a scenario
