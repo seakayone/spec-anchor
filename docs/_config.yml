@@ -1,0 +1,20 @@
+title: spec-anchor
+description: Link Java tests to OpenSpec scenarios and navigate between them in IntelliJ IDEA.
+baseurl: /spec-anchor
+repository: seakayone/spec-anchor
+version: 0.1.0  # bumped by scripts/release.sh
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+# sidebar order; urls are relative to baseurl
+nav:
+  - title: Overview
+    url: /
+  - title: Installation
+    url: /installation.html
+  - title: The @OpenSpec annotation
+    url: /annotation.html
+  - title: The IntelliJ plugin
+    url: /intellij-plugin.html

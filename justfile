@@ -16,3 +16,8 @@ release-dry version="":
 # Publish the current version; use `--github-only` if Central succeeded but the GitHub release is missing
 publish *args:
     scripts/publish.sh {{args}}
+
+# Preview the GitHub Pages docs site at http://localhost:4000/spec-anchor/ (Docker; gems cached in a volume)
+docs:
+    docker run --rm -it -p 4000:4000 -p 35729:35729 -v "$PWD/docs":/site -v spec-anchor-gems:/usr/local/bundle -w /site ruby:3.3 \
+        bash -c 'bundle install --quiet && bundle exec jekyll serve --host 0.0.0.0 --livereload'

@@ -174,3 +174,8 @@ gradle-app.setting
 
 ### IntelliJ Platform Gradle Plugin ###
 .intellijPlatform
+
+### Jekyll (docs preview) ###
+docs/_site/
+docs/.jekyll-cache/
+docs/Gemfile.lock
