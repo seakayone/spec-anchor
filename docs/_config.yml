@@ -18,3 +18,5 @@ nav:
     url: /annotation.html
   - title: The IntelliJ plugin
     url: /intellij-plugin.html
+  - title: Using with AI agents
+    url: /agents.html

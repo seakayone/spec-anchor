@@ -32,6 +32,7 @@ The slug, not the scenario's name, is the link, so you can reword a scenario hea
 - [Installation](installation.md): add the annotation to Gradle or Maven, install the IntelliJ plugin.
 - [The `@OpenSpec` annotation](annotation.md): slugs, linking tests to scenarios and capabilities, rules and examples.
 - [The IntelliJ plugin](intellij-plugin.md): navigation, highlighting, inspections and their settings.
+- [Using with AI agents](agents.md): an `openspec/config.yaml` snippet that teaches any agent the slug and annotation convention.
 
 ## Requirements
 

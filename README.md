@@ -2,7 +2,7 @@
 
 Links Java tests to [OpenSpec](https://github.com/Fission-AI/OpenSpec) scenarios and lets you navigate between them in IntelliJ IDEA.
 
-**Documentation:** [docs/](docs/README.md): [installation](docs/installation.md), [the `@OpenSpec` annotation](docs/annotation.md), [the IntelliJ plugin](docs/intellij-plugin.md).
+**Documentation:** [docs/](docs/README.md): [installation](docs/installation.md), [the `@OpenSpec` annotation](docs/annotation.md), [the IntelliJ plugin](docs/intellij-plugin.md), [using with AI agents](docs/agents.md).
 
 ## Modules
 

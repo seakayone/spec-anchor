@@ -11,33 +11,14 @@ context: |
     org.intellij.plugins.markdown, package org.kleinb.openspec.intellij, plugin ID org.kleinb.openspec,
     tests with the IntelliJ platform test framework (light fixtures, run on plain JUnit 4)
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
+rules:
+  specs:
+    - 'End every scenario heading with a slug anchor, e.g. `#### Scenario: Valid credentials <a id="valid-credentials"></a>` (lowercase a-z, 0-9, single hyphens, unique per spec.md)'
+    - 'When modifying a scenario, keep its existing `<a id="..."></a>` anchor unchanged'
+  tasks:
+    - 'Every task that changes Java or Kotlin code includes writing or updating the tests that cover the affected scenarios, annotated with `@OpenSpec`'
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
-
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+operations:
+  apply:
+    guidance:
+      - 'Every Java or Kotlin code change MUST come with tests annotated `@OpenSpec(capability = "<path under openspec/specs/>", scenario = "<slug>")` for each scenario they verify; a change is not done while a scenario it touches has no linked test'
