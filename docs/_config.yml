@@ -2,7 +2,7 @@ title: spec-anchor
 description: Link Java tests to OpenSpec scenarios and navigate between them in IntelliJ IDEA.
 baseurl: /spec-anchor
 repository: seakayone/spec-anchor
-version: 0.1.0  # bumped by scripts/release.sh
+version: 0.2.0  # bumped by scripts/release.sh
 markdown: kramdown
 kramdown:
   input: GFM
