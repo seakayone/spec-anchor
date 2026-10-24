@@ -24,5 +24,9 @@
                          displayName="Invalid or duplicate OpenSpec scenario slug" groupName="OpenSpec"
                          enabledByDefault="true" level="ERROR"
                          implementationClass="org.kleinb.openspec.intellij.ScenarioSlugInspection"/>
+        <localInspection language="Markdown" shortName="OpenSpecUntestedScenario"
+                         displayName="OpenSpec scenario without linked test" groupName="OpenSpec"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="org.kleinb.openspec.intellij.UntestedScenarioInspection"/>
     </extensions>
 </idea-plugin>

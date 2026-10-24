@@ -1,0 +1,9 @@
+<html>
+<body>
+Reports scenarios in OpenSpec capability specs that have a slug but no linked test, for example a heading
+<code>#### Scenario: Valid credentials &lt;a id="valid-credentials"&gt;&lt;/a&gt;</code> with no test annotated
+<code>@OpenSpec(capability = "...", scenario = "valid-credentials")</code>.
+<p>A test linked only to the whole capability does not cover its scenarios. Scenarios without a slug are not reported.
+Only Java tests are found.</p>
+</body>
+</html>

@@ -5,7 +5,7 @@ Links Java tests to [OpenSpec](https://github.com/Fission-AI/OpenSpec) scenarios
 ## Modules
 
 - `openspec-annotations` – the `@OpenSpec` annotation (Java 8+, no dependencies).
-- `openspec-intellij-plugin` – IntelliJ IDEA 2025.2+ plugin: gutter navigation between `spec.md` scenarios and annotated tests, Ctrl+Click from the annotation to the spec, and highlighting of unknown references and invalid or duplicate slugs.
+- `openspec-intellij-plugin` – IntelliJ IDEA 2025.2+ plugin: gutter navigation between `spec.md` scenarios and annotated tests, Ctrl+Click from the annotation to the spec, and highlighting of unknown references, invalid or duplicate slugs, and untested scenarios.
 
 ## Linking a test to a scenario
 
@@ -24,6 +24,10 @@ void validLogin() { }
 ```
 
 Leave out `scenario` to link to the whole capability. The annotation is repeatable.
+
+## Untested scenarios
+
+The plugin warns on every scenario heading that has a slug but no linked test. A test linked only to the whole capability does not cover its scenarios, and scenarios without a slug are not reported. Only Java tests are found. To turn the warning off or change its level, go to *Settings → Editor → Inspections → OpenSpec → OpenSpec scenario without linked test*.
 
 ## Build
 
