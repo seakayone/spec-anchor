@@ -12,7 +12,7 @@ Links Java tests to [OpenSpec](https://github.com/Fission-AI/OpenSpec) scenarios
 The annotation is on Maven Central. Gradle:
 
 ```kotlin
-testImplementation("org.kleinb.openspec:spec-anchor-annotations:0.0.1")
+testImplementation("org.kleinb.openspec:spec-anchor-annotations:0.1.0")
 ```
 
 Maven:
@@ -21,7 +21,7 @@ Maven:
 <dependency>
     <groupId>org.kleinb.openspec</groupId>
     <artifactId>spec-anchor-annotations</artifactId>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
     <scope>test</scope>
 </dependency>
 ```
