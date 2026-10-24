@@ -110,4 +110,28 @@ class CheckerTest {
                 new Link("com.example.LoginTest#change", "user-auth", "in-change"),
                 new Link("com.example.LoginTest#valid", "user-auth", "no-such-slug")));
     }
+
+    @Test
+    @OpenSpec(capability = "build-spec-check", scenario = "valid-anchor-not-missing")
+    @OpenSpec(capability = "build-spec-check", scenario = "valid-anchor-not-invalid")
+    void validAnchorIsNeitherMissingNorInvalid() throws IOException {
+        spec(USER_AUTH, VALID);
+
+        List<String> findings = findings();
+
+        assertEquals(List.of(), findings.stream().filter(f -> f.startsWith("missing-slug") || f.startsWith("invalid-slug")).toList());
+        assertEquals(1, findings.size(), findings.toString()); // only the untested scenario
+    }
+
+    @Test
+    @OpenSpec(capability = "build-spec-check", scenario = "known-references-not-reported")
+    void knownReferencesNotReported() throws IOException {
+        spec(USER_AUTH, VALID);
+        spec("openspec/changes/add-login/specs/user-auth/spec.md", "#### Scenario: B <a id=\"in-change\"></a>\n");
+
+        assertEquals(List.of(), findings(
+            new Link("LoginTest", "user-auth", ""),
+            new Link("LoginTest#valid", "user-auth", "valid-credentials"),
+            new Link("LoginTest#change", "user-auth", "in-change")));
+    }
 }

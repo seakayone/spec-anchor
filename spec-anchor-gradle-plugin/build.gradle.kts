@@ -85,7 +85,10 @@ tasks.test {
     dependsOn(annotationsJar)
     val jar = annotationsJar.flatMap { it.archiveFile }
     val kotlinVersion = libs.versions.kotlin.get()
+    // -PspecAnchor.shard=k/n runs part of the 1024-build fail-toggle matrix (0/1 for all of it)
+    val shard = providers.gradleProperty("specAnchor.shard").orElse("")
     jvmArgumentProviders.add(CommandLineArgumentProvider {
-        listOf("-DspecAnchor.annotationsJar=${jar.get().asFile.absolutePath}", "-DspecAnchor.kotlinVersion=$kotlinVersion")
+        listOf("-DspecAnchor.annotationsJar=${jar.get().asFile.absolutePath}", "-DspecAnchor.kotlinVersion=$kotlinVersion") +
+            listOf(shard.get()).filter { it.isNotEmpty() }.map { "-DspecAnchor.shard=$it" }
     })
 }

@@ -49,6 +49,13 @@
   - the multi-project limitation
 
   Update `docs/README.md` (add the build check to *Why*, a *Contents* entry, a *Requirements* row "Gradle plugin: Gradle 9 or later, Java 17 or later"), add a Gradle plugin section to `docs/installation.md`, and in `README.md` update the tagline, the *Modules* list and the *Installation* section. Verify by reading each changed page against the spec and the implemented extension options.
+- [x] 3.6 Cover every fail-option combination without changing the plugin code:
+  - per kind (TestKit): only its option on fails (`fails-on-enabled-kind`), all other options on passes (`ignores-disabled-kinds`)
+  - `reports-only-by-default`, `passes-without-findings`, `names-all-failing-kinds`, `missing-openspec-dir`
+  - unit tests for `valid-anchor-not-missing`, `valid-anchor-not-invalid`, `known-references-not-reported`
+  - the 32 x 32 matrix of options and found kinds (`fails-only-on-enabled-found-kinds`), opt-in with `-PspecAnchor.shard=k/n`
+
+  Document the missing-`openspecDir` behavior and the matrix command. Verify the default suite passes and all 1024 matrix builds pass.
 
 ## 4. Publishing
 

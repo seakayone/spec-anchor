@@ -32,6 +32,10 @@ The task SHALL read every `spec.md` below `<openspecDir>/specs/` and below `<ope
 - **WHEN** the build sets `specAnchor { openspecDir = file("docs/openspec") }`
 - **THEN** specs are read from `docs/openspec/specs/` and `docs/openspec/changes/`
 
+#### Scenario: Missing openspec directory <a id="missing-openspec-dir"></a>
+- **WHEN** `openspecDir` points to a directory that does not exist and a test is annotated `@OpenSpec(capability = "user-auth")`
+- **THEN** the task reports that annotation as an unknown reference and no spec findings, and succeeds
+
 #### Scenario: Heading in a code block <a id="ignores-code-blocks"></a>
 - **WHEN** a `#### Scenario:` line appears inside a fenced code block in a `spec.md`
 - **THEN** it is not treated as a scenario
@@ -69,12 +73,20 @@ The task SHALL report every scenario heading that contains no `<a` anchor as mis
 - **WHEN** a spec contains `#### Scenario: Valid credentials` with no anchor
 - **THEN** a missing-slug finding names the spec file and the heading's line, and the scenario is not reported as untested
 
+#### Scenario: Heading with a valid anchor <a id="valid-anchor-not-missing"></a>
+- **WHEN** a scenario heading ends with `<a id="valid-credentials"></a>`
+- **THEN** no missing-slug finding is reported for it
+
 ### Requirement: Invalid slug anchors are reported
 The task SHALL report every scenario heading whose `<a` anchor is not a valid slug anchor as defined by `ide-spec-navigation`. Such a heading SHALL NOT also be reported as missing a slug or as untested.
 
 #### Scenario: Uppercase slug <a id="reports-invalid-slug"></a>
 - **WHEN** a scenario heading ends with `<a id="Valid-Credentials"></a>`
 - **THEN** exactly one finding, an invalid-slug finding, is reported for that heading
+
+#### Scenario: Valid anchor <a id="valid-anchor-not-invalid"></a>
+- **WHEN** a scenario heading ends with `<a id="valid-credentials"></a>`
+- **THEN** no invalid-slug finding is reported for it
 
 ### Requirement: Duplicate slugs are reported
 The task SHALL report every scenario heading whose slug is also used by another scenario heading in the same `spec.md`.
@@ -98,6 +110,10 @@ The task SHALL report every `@OpenSpec` whose `capability` matches no discovered
 - **WHEN** a test is annotated with an existing capability and `scenario = "no-such-slug"`
 - **THEN** an unknown-reference finding names the test and the slug
 
+#### Scenario: Known references <a id="known-references-not-reported"></a>
+- **WHEN** tests link to an existing capability without a scenario, to a slug in its main spec, and to a slug that exists only in an active change's spec of that capability
+- **THEN** no unknown-reference finding is reported
+
 ### Requirement: Findings are reported in the build output and a file
 The task SHALL print each finding on its own line with its kind, location and message, followed by a count per kind. It SHALL write the same lines to `build/reports/spec-anchor/findings.txt`. With no findings, it SHALL print that there are none.
 
@@ -113,13 +129,25 @@ The task SHALL print each finding on its own line with its kind, location and me
 The `specAnchor` extension SHALL offer `failOnUntestedScenario`, `failOnMissingSlug`, `failOnInvalidSlug`, `failOnDuplicateSlug` and `failOnUnknownReference`, all `false` by default. The task SHALL fail after reporting all findings when at least one finding has a kind whose toggle is `true`, and SHALL name those kinds and their counts in the failure message.
 
 #### Scenario: Default configuration only reports <a id="reports-only-by-default"></a>
-- **WHEN** no toggle is set and the check finds untested scenarios
+- **WHEN** no toggle is set and the check finds findings of all five kinds
 - **THEN** the findings are reported and the task succeeds
 
 #### Scenario: Enabled kind fails the build <a id="fails-on-enabled-kind"></a>
-- **WHEN** `failOnUntestedScenario = true` and the check finds two untested scenarios
-- **THEN** all findings are reported and the task fails with a message naming 2 untested scenarios
+- **WHEN** for any one kind only its toggle is `true` (for example `failOnMissingSlug`) and the only finding is of that kind
+- **THEN** the finding is reported and the task fails with a message naming 1 finding of that kind
 
 #### Scenario: Other kinds do not fail <a id="ignores-disabled-kinds"></a>
-- **WHEN** `failOnUntestedScenario = true` and the only findings are missing slugs
+- **WHEN** for any one kind every toggle except its own is `true` and the only finding is of that kind
 - **THEN** the task succeeds
+
+#### Scenario: Several enabled kinds fail together <a id="names-all-failing-kinds"></a>
+- **WHEN** `failOnUntestedScenario` and `failOnUnknownReference` are `true` and the check finds two untested scenarios, one missing slug and one unknown reference
+- **THEN** the task fails with a message naming 2 untested scenarios and 1 unknown reference, and not the missing slug
+
+#### Scenario: All toggles on without findings <a id="passes-without-findings"></a>
+- **WHEN** every toggle is `true` and the check finds nothing
+- **THEN** the task succeeds
+
+#### Scenario: Any combination of toggles and findings <a id="fails-only-on-enabled-found-kinds"></a>
+- **WHEN** any subset of the five toggles is `true` and any subset of the five kinds is found
+- **THEN** the task fails exactly when an enabled kind is found, and the message names exactly the enabled kinds that were found

@@ -77,14 +77,14 @@ specAnchor {
 
 | Option | Default | Effect |
 |---|---|---|
-| `openspecDir` | `openspec` in the root project | The OpenSpec directory to read, for example `file("docs/openspec")`. |
+| `openspecDir` | `openspec` in the root project | The OpenSpec directory to read, for example `file("docs/openspec")`. If it doesn't exist, there are no specs, so every annotation is reported as `unknown-reference`. |
 | `failOnUntestedScenario` | `false` | Fail on `untested-scenario`. |
 | `failOnMissingSlug` | `false` | Fail on `missing-slug`. |
 | `failOnInvalidSlug` | `false` | Fail on `invalid-slug`. |
 | `failOnDuplicateSlug` | `false` | Fail on `duplicate-slug`. |
 | `failOnUnknownReference` | `false` | Fail on `unknown-reference`. |
 
-The task always reports all findings before it fails. The failure message names the enabled kinds that were found, for example `spec-anchor check failed: 2 untested-scenario`.
+The task always reports all findings before it fails. It fails exactly when it finds a kind whose option is on, and the failure message names each such kind with its count and no others, for example `spec-anchor check failed: 2 untested-scenario, 1 unknown-reference`.
 
 A common start is `failOnInvalidSlug`, `failOnDuplicateSlug` and `failOnUnknownReference`, since those are always mistakes. While you are writing a change, its scenarios are untested by design, so `failOnUntestedScenario` can wait.
 
