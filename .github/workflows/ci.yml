@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [spec-anchor-annotations, spec-anchor-intellij-plugin]
+        module: [spec-anchor-annotations, spec-anchor-gradle-plugin, spec-anchor-intellij-plugin]
     name: ${{ matrix.module }}
     steps:
       - uses: actions/checkout@v5

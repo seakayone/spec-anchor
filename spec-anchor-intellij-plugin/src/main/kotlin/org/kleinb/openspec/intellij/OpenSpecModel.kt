@@ -1,6 +1,7 @@
 package org.kleinb.openspec.intellij
 
 import com.intellij.codeInsight.AnnotationUtil
+import com.intellij.lang.java.JavaLanguage
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.VirtualFile
@@ -84,7 +85,7 @@ fun specTargets(project: Project, capability: String, scenario: String): List<Ps
 class Link(val owner: PsiModifierListOwner, val capability: String, val scenario: String)
 
 fun links(project: Project): List<Link> = CachedValuesManager.getManager(project).getCachedValue(project) {
-    CachedValueProvider.Result.create(findLinks(project), PsiModificationTracker.MODIFICATION_COUNT)
+    CachedValueProvider.Result.create(findLinks(project), PsiModificationTracker.getInstance(project).forLanguage(JavaLanguage.INSTANCE))
 }
 
 /** Tests linked to [capability], or only those linked to its [scenario] slug. */

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Usage: scripts/publish.sh [--check | --notes [version] | --github-only | <jreleaser args, e.g. --dry-run>]
-# Stages spec-anchor-annotations with Gradle, deploys to Maven Central with the JReleaser CLI and
+# Stages spec-anchor-annotations and spec-anchor-gradle-plugin with Gradle, deploys to Maven Central with the JReleaser CLI and
 # creates the GitHub release with gh, with the IntelliJ plugin zip attached.
 #   --check        only verify that tools, credentials and signing keys are available
 #   --github-only  only create the GitHub release (recovery after Central succeeded)
@@ -80,6 +80,7 @@ print_summary() { # <heading>
   printf 'GitHub release: %s/releases/tag/v%s\n' "$repo_url" "$version"
   printf 'Plugin zip:     %s\n' "$plugin_zip"
   printf 'Maven Central:  https://central.sonatype.com/artifact/org.kleinb.openspec/spec-anchor-annotations/%s\n' "$version"
+  printf 'Gradle plugin:  https://central.sonatype.com/artifact/org.kleinb.openspec/spec-anchor-gradle-plugin/%s\n' "$version"
   printf '\nRelease notes:\n\n'
   cat "$notes"
   printf '\n\n'
@@ -94,7 +95,7 @@ if [[ "$mode" == "--github-only" ]]; then
   exit 0
 fi
 
-./gradlew :spec-anchor-annotations:publish :spec-anchor-intellij-plugin:buildPlugin
+./gradlew :spec-anchor-annotations:publish :spec-anchor-gradle-plugin:publish :spec-anchor-intellij-plugin:buildPlugin
 jreleaser deploy --git-root-search "$@"
 
 # The native JReleaser CLI cannot create tags (JGit fails under GraalVM), so release.sh

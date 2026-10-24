@@ -1,6 +1,6 @@
 # Installation
 
-You need two things: the annotation library on your test classpath, and the plugin in IntelliJ IDEA. The annotation works without the plugin (it is only metadata), but the plugin is what makes it useful while you work.
+You need the annotation library on your test classpath and the plugin in IntelliJ IDEA. The annotation works without the plugin (it is only metadata), but the plugin is what makes it useful while you work. The Gradle plugin is optional: add it to check specs against tests in the build.
 
 ## Annotation library
 
@@ -51,13 +51,37 @@ The plugin requires IntelliJ IDEA 2025.2 or later (Community or Ultimate) with t
 
 To update, install the newer zip the same way; it replaces the old version.
 
+## Gradle plugin
+
+The Gradle plugin is published to Maven Central, so add Maven Central to the plugin repositories in `settings.gradle.kts`:
+
+```kotlin
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+```
+
+Then apply it in the project that contains your tests:
+
+```kotlin
+plugins {
+    java
+    id("org.kleinb.openspec") version "0.3.0"
+}
+```
+
+It needs Gradle 9 or later and Java 17 or later. See [the Gradle plugin](gradle-plugin.md) for what it reports and how to fail the build.
+
 ## Project layout
 
-The plugin looks for specs in the standard OpenSpec locations of the open project:
+Both plugins look for specs in the standard OpenSpec locations of the open project:
 
 - `openspec/specs/**/spec.md`: the main specs.
 - `openspec/changes/<change>/specs/**/spec.md`: specs in active changes, so you can link and review tests before a change is archived.
 
-Specs below `openspec/changes/archive/` are ignored. No further configuration is needed.
+Specs below `openspec/changes/archive/` are ignored. No further configuration is needed (the Gradle plugin's `openspecDir` option can point elsewhere).
 
 Next: [link your first test](annotation.md).

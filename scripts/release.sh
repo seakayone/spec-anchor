@@ -88,20 +88,22 @@ esac
 if $dry_run; then
   # restore from copies, not git, so uncommitted edits to these files survive
   backup="$(mktemp -d)"
-  cp version.txt README.md docs/installation.md docs/_config.yml "$backup"/
-  trap 'cp "$backup"/version.txt "$backup"/README.md . && cp "$backup"/installation.md "$backup"/_config.yml docs/ && rm -rf "$backup"' EXIT
+  cp version.txt README.md docs/installation.md docs/gradle-plugin.md docs/_config.yml "$backup"/
+  trap 'cp "$backup"/version.txt "$backup"/README.md . && cp "$backup"/installation.md "$backup"/gradle-plugin.md "$backup"/_config.yml docs/ && rm -rf "$backup"' EXIT
 fi
 
 if ! $dry_run; then
   # a failed build must not leave a half-bumped, dirty tree behind
-  trap 'git checkout -- version.txt README.md docs/installation.md docs/_config.yml' EXIT
+  trap 'git checkout -- version.txt README.md docs/installation.md docs/gradle-plugin.md docs/_config.yml' EXIT
 fi
 
 echo "$version" > version.txt
 sed -i.bak -E -e "s/(spec-anchor-annotations:)[0-9]+\.[0-9]+\.[0-9]+/\1$version/" \
-  -e "s#<version>[0-9]+\.[0-9]+\.[0-9]+</version>#<version>$version</version>#" README.md docs/installation.md
+  -e "s#<version>[0-9]+\.[0-9]+\.[0-9]+</version>#<version>$version</version>#" \
+  -e "s/(id\(\"org\.kleinb\.openspec\"\) version \")[0-9]+\.[0-9]+\.[0-9]+/\1$version/" \
+  README.md docs/installation.md docs/gradle-plugin.md
 sed -i.bak -E "s/^version: [0-9]+\.[0-9]+\.[0-9]+/version: $version/" docs/_config.yml
-rm -f README.md.bak docs/installation.md.bak docs/_config.yml.bak
+rm -f README.md.bak docs/installation.md.bak docs/gradle-plugin.md.bak docs/_config.yml.bak
 
 ./gradlew clean build
 
