@@ -1,0 +1,28 @@
+<idea-plugin>
+    <id>org.kleinb.openspec</id>
+    <name>OpenSpec Test Links</name>
+    <vendor>Christian Kleinbölting</vendor>
+    <description><![CDATA[
+        Navigate between OpenSpec <code>spec.md</code> scenarios and the Java tests annotated with
+        <code>@OpenSpec(capability = "...", scenario = "...")</code>, in both directions.
+        Highlights unknown capabilities and scenario slugs, and invalid or duplicate slug anchors in specs.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+    <depends>org.intellij.plugins.markdown</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.lineMarkerProvider language="Markdown"
+                                        implementationClass="org.kleinb.openspec.intellij.SpecLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="JAVA"
+                                        implementationClass="org.kleinb.openspec.intellij.TestLineMarkerProvider"/>
+        <psi.referenceContributor language="JAVA"
+                                  implementation="org.kleinb.openspec.intellij.OpenSpecReferenceContributor"/>
+        <annotator language="JAVA" implementationClass="org.kleinb.openspec.intellij.UnresolvedSpecReferenceAnnotator"/>
+        <localInspection language="Markdown" shortName="OpenSpecScenarioSlug"
+                         displayName="Invalid or duplicate OpenSpec scenario slug" groupName="OpenSpec"
+                         enabledByDefault="true" level="ERROR"
+                         implementationClass="org.kleinb.openspec.intellij.ScenarioSlugInspection"/>
+    </extensions>
+</idea-plugin>

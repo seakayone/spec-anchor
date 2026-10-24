@@ -49,7 +49,7 @@ public @interface OpenSpec {
 - `RUNTIME` retention (rather than `SOURCE`/`CLASS`) so the coverage follow-up and JUnit extensions can read it without parsing source.
 - `@Repeatable` with container `@OpenSpecs`. The plugin has to handle both the direct and the container form.
 - Compiled with `--release 8` so any test codebase can use it. The library has no dependencies; JUnit is `testImplementation` only.
-- Maven group `org.kleinb.openspec`. Java packages: `org.kleinb.openspec.annotation` (annotation module) and `org.kleinb.openspec.intellij` (plugin module, also used as the plugin ID).
+- Maven group `org.kleinb.openspec`. Java packages: `org.kleinb.openspec.annotation` (annotation module) and `org.kleinb.openspec.intellij` (plugin module). The plugin ID is `org.kleinb.openspec`: plugin IDs must not contain "intellij" (Plugin Verifier and Marketplace rule).
 
 ### Plugin platform target
 - IntelliJ Platform Gradle Plugin 2.x, targeting IntelliJ IDEA 2025.2+ (`sinceBuild = 252`), JVM 21, Kotlin.
@@ -85,7 +85,7 @@ public @interface OpenSpec {
 | Navigate from scenario/capability to tests | `codeInsight.lineMarkerProvider` for `Markdown`, using `NavigationGutterIconBuilder` (gives the chooser for several targets) |
 | Navigate from annotation to spec (go-to-declaration) | `psi.referenceContributor` on `PsiLiteralExpression` inside `@OpenSpec`'s `capability`/`scenario` |
 | Gutter marker on annotated test | `codeInsight.lineMarkerProvider` for `JAVA` on the annotation's name identifier |
-| Unknown references highlighted | non-soft `PsiReference`s, so the platform marks unresolved values itself, with no custom inspection |
+| Unknown references highlighted | `annotator` for `JAVA` that marks `@OpenSpec` references resolving to nothing (Java does not report unresolved references in string literals itself, even non-soft ones; found during implementation) |
 | Invalid / duplicate slugs highlighted | one `localInspection` for `Markdown` |
 
 Line markers are attached to leaf elements (the header's first token / the annotation's identifier), as the platform requires, to avoid duplicate-marker warnings.

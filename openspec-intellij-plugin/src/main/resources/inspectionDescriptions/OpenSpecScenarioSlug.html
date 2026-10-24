@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports problems with scenario slugs in OpenSpec capability specs:
+<ul>
+    <li>an <code>&lt;a</code> in a <code>#### Scenario:</code> heading that is not exactly
+        <code>&lt;a id="slug"&gt;&lt;/a&gt;</code> at the end of the heading, with a slug of lowercase ASCII letters,
+        digits and single hyphens (error);</li>
+    <li>a slug used by more than one scenario in the same spec (warning).</li>
+</ul>
+<p>Tests link to scenarios by slug: <code>@OpenSpec(capability = "user-auth", scenario = "valid-credentials")</code>.</p>
+</body>
+</html>

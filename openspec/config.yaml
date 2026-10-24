@@ -8,7 +8,7 @@ context: |
     package org.kleinb.openspec.annotation, tests with JUnit 5
   - openspec-intellij-plugin: Kotlin on JVM 21, IntelliJ Platform Gradle Plugin 2.x,
     targets IntelliJ IDEA 2025.2+ (sinceBuild 252), depends on bundled com.intellij.java and
-    org.intellij.plugins.markdown, package org.kleinb.openspec.intellij (also the plugin ID),
+    org.intellij.plugins.markdown, package org.kleinb.openspec.intellij, plugin ID org.kleinb.openspec,
     tests with the IntelliJ platform test framework (light fixtures, JUnit vintage engine)
 
 # Project context (optional)
