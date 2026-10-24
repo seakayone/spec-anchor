@@ -8,7 +8,8 @@ public record Finding(Kind kind, String location, String message) {
         MISSING_SLUG("missing-slug"),
         INVALID_SLUG("invalid-slug"),
         DUPLICATE_SLUG("duplicate-slug"),
-        UNKNOWN_REFERENCE("unknown-reference");
+        UNKNOWN_REFERENCE("unknown-reference"),
+        REMOVED_REFERENCE("removed-reference");
 
         public final String id;
 

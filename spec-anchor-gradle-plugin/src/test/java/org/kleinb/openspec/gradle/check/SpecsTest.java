@@ -66,7 +66,7 @@ class SpecsTest {
             "~~~",
             "#### Scenario: In a tilde fence",
             "~~~",
-            "#### Scenario: Real <a id=\"real\"></a>"));
+            "#### Scenario: Real <a id=\"real\"></a>")).scenarios();
 
         assertEquals(1, scenarios.size());
         assertEquals("real", scenarios.get(0).slug());
@@ -81,7 +81,7 @@ class SpecsTest {
             "#### Scenario: Upper <a id=\"Valid-Credentials\"></a>",
             "#### Scenario: <a id=\"valid-credentials\"></a> Not at end",
             "#### Scenario: Single quotes <a id='x'></a>",
-            "##### Scenario: Too deep <a id=\"deep\"></a>"));
+            "##### Scenario: Too deep <a id=\"deep\"></a>")).scenarios();
 
         assertEquals(5, scenarios.size());
         assertEquals("Valid credentials", scenarios.get(0).name());

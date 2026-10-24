@@ -7,7 +7,7 @@ Links Java tests to [OpenSpec](https://github.com/Fission-AI/OpenSpec) scenarios
 ## Modules
 
 - `spec-anchor-annotations` – the `@OpenSpec` annotation (Java 8+, no dependencies).
-- `spec-anchor-gradle-plugin` – Gradle plugin `org.kleinb.openspec` (Gradle 9+, Java 17+): a `specAnchorCheck` task, run by `check`, that reports untested scenarios, missing, invalid or duplicate slugs, and unknown references, and can fail the build on the kinds you choose.
+- `spec-anchor-gradle-plugin` – Gradle plugin `org.kleinb.openspec` (Gradle 9+, Java 17+): a `specAnchorCheck` task, run by `check`, that reports untested scenarios, missing, invalid or duplicate slugs, unknown references, and links to scenarios that an active change removes, and can fail the build on the kinds you choose.
 - `spec-anchor-intellij-plugin` – IntelliJ IDEA 2025.2+ plugin: gutter navigation between `spec.md` scenarios and annotated tests, Ctrl+Click from the annotation to the spec, and highlighting of unknown references, invalid or duplicate slugs, and untested scenarios.
 
 ## Installation

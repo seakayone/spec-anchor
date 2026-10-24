@@ -56,6 +56,12 @@
   - the 32 x 32 matrix of options and found kinds (`fails-only-on-enabled-found-kinds`), opt-in with `-PspecAnchor.shard=k/n`
 
   Document the missing-`openspecDir` behavior and the matrix command. Verify the default suite passes and all 1024 matrix builds pass.
+- [ ] 3.7 Make active changes supersede living requirements:
+  - parse `### Requirement:` names and the `REMOVED`/`MODIFIED` sections
+  - drop findings for superseded living scenarios
+  - add the `removed-reference` kind and `failOnRemovedReference` (default `false`)
+
+  Add unit tests for `removed-scenarios-not-reported`, `modified-requirement-replaces-living`, `requirement-names-match-loosely`, `unaffected-requirements-checked`, `reports-removed-reference`, `modified-drops-scenario` and `kept-scenario-not-removed`. Extend the TestKit fixture and the matrix to six kinds, and update `docs/gradle-plugin.md` and `README.md`. Verify the default suite and the full matrix pass.
 
 ## 4. Publishing
 

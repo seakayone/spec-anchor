@@ -21,9 +21,10 @@ public abstract class SpecAnchorPlugin implements Plugin<Project> {
         extension.getOpenspecDir().convention(rootDir.dir("openspec"));
         extension.getFailOnUntestedScenario().convention(false);
         extension.getFailOnMissingSlug().convention(false);
-        extension.getFailOnInvalidSlug().convention(false);
-        extension.getFailOnDuplicateSlug().convention(false);
-        extension.getFailOnUnknownReference().convention(false);
+        extension.getFailOnInvalidSlug().convention(true);
+        extension.getFailOnDuplicateSlug().convention(true);
+        extension.getFailOnUnknownReference().convention(true);
+        extension.getFailOnRemovedReference().convention(false);
 
         TaskProvider<SpecAnchorCheck> check = project.getTasks().register("specAnchorCheck", SpecAnchorCheck.class, task -> {
             task.setGroup("verification");
@@ -35,6 +36,7 @@ public abstract class SpecAnchorPlugin implements Plugin<Project> {
             failOn(task, extension.getFailOnInvalidSlug(), Kind.INVALID_SLUG);
             failOn(task, extension.getFailOnDuplicateSlug(), Kind.DUPLICATE_SLUG);
             failOn(task, extension.getFailOnUnknownReference(), Kind.UNKNOWN_REFERENCE);
+            failOn(task, extension.getFailOnRemovedReference(), Kind.REMOVED_REFERENCE);
             task.getReportFile().set(project.getLayout().getBuildDirectory().file("reports/spec-anchor/findings.txt"));
         });
 

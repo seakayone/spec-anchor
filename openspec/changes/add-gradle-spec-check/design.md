@@ -50,7 +50,7 @@ New module `spec-anchor-gradle-plugin`, written in Java with `java-gradle-plugin
 - Rejected: parsing sources. It would need separate Java and Kotlin parsers.
 
 ### Task, extension and wiring
-- `SpecAnchorExtension` is named `specAnchor`. It has a `DirectoryProperty openspecDir`, which defaults via `project.getIsolated().getRootProject().getProjectDirectory().dir("openspec")` (safe for isolated projects), and five `Property<Boolean>` toggles that default to `false`.
+- `SpecAnchorExtension` is named `specAnchor`. It has a `DirectoryProperty openspecDir`, which defaults via `project.getIsolated().getRootProject().getProjectDirectory().dir("openspec")` (safe for isolated projects), and five `Property<Boolean>` toggles. `failOnInvalidSlug`, `failOnDuplicateSlug` and `failOnUnknownReference` default to `true`, the other two to `false`.
 - `SpecAnchorCheck` is an abstract task. Its inputs are:
   - spec files: `@InputFiles`, a file tree of `openspecDir` filtered to `**/spec.md`, `PathSensitivity.RELATIVE`
   - test classes dirs and test runtime classpath: `@Classpath`
@@ -68,6 +68,13 @@ New module `spec-anchor-gradle-plugin`, written in Java with `java-gradle-plugin
   - Spec locations are paths relative to the root project directory plus `:line`. Test locations are the class name or `Class#method`.
   - A summary line gives the count per kind, or `spec-anchor: no findings`.
   - If any finding's kind is enabled, the task throws a `GradleException` with a message like `spec-anchor: 2 untested-scenario, 1 unknown-reference`.
+
+### Delta sections: REMOVED and MODIFIED supersede living requirements
+- The parser also records each scenario's `### Requirement:` name (whitespace collapsed, as OpenSpec matches names) and, per file, the requirement names listed under `## REMOVED Requirements` and `## MODIFIED Requirements`. Scenarios inside a `REMOVED` section are dropped.
+- For each capability, the checker takes the union of removed and modified names over all change specs. A living-spec scenario under one of those requirements is superseded: it gets no findings and does not resolve links. The change spec's own scenarios (`ADDED`, `MODIFIED`) count normally.
+- Slugs that only superseded scenarios carry are the capability's removed slugs. A link to one is a `removed-reference` instead of an `unknown-reference`, with `failOnRemovedReference` off by default. Before a change is applied, the linked test is still legitimate, so proposing a removal must not break the build. Projects can turn it on to force cleanup before archive.
+- `RENAMED` only renames requirements, and slugs don't change, so it is ignored. The IntelliJ plugin keeps reading all scenarios. Navigation should still reach a scenario that a change is about to remove.
+- Rejected: treating removed scenarios as gone. Links to them would become `unknown-reference`, which fails by default, as soon as a removal is proposed.
 
 ### Resolution rules
 - A link resolves against the union of all discovered files of its capability, both main and change specs, which matches `specTargets` in the IDE.

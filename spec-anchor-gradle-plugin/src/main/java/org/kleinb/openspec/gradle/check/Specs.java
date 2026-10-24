@@ -5,7 +5,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -13,27 +15,37 @@ import java.util.stream.Stream;
 /** Reads capability specs by the discovery and slug rules of {@code ide-spec-navigation}. */
 public final class Specs {
 
-    /** A capability spec: its capability path, file and scenario headings. */
-    public record SpecFile(String capability, Path path, List<Scenario> scenarios) { }
+    /**
+     * A capability spec: its capability path, file and scenario headings. [living] is true below {@code specs/}, false in
+     * a change. [superseded] holds the requirement names listed under {@code REMOVED} or {@code MODIFIED Requirements}.
+     */
+    public record SpecFile(String capability, Path path, boolean living, List<Scenario> scenarios, Set<String> superseded) { }
 
     /**
-     * A {@code #### Scenario:} heading at 1-based [line]. [slug] is null when the heading has no valid slug anchor;
-     * [invalidAnchor] tells an invalid anchor apart from a missing one.
+     * A {@code #### Scenario:} heading at 1-based [line] below [requirement] (null before any requirement). [slug] is
+     * null when the heading has no valid slug anchor; [invalidAnchor] tells an invalid anchor apart from a missing one.
      */
-    public record Scenario(int line, String name, String slug, boolean invalidAnchor) { }
+    public record Scenario(int line, String name, String slug, boolean invalidAnchor, String requirement) { }
+
+    /** A spec's scenarios and the requirements it supersedes. */
+    public record Parsed(List<Scenario> scenarios, Set<String> superseded) { }
 
     // Same rules as OpenSpecModel.kt in the IntelliJ plugin.
     private static final Pattern SCENARIO_PREFIX = Pattern.compile("^ {0,3}####\\s+Scenario:");
     private static final Pattern SLUG_ANCHOR = Pattern.compile("(<a id=\"([a-z0-9]+(?:-[a-z0-9]+)*)\"></a>)\\s*$");
     private static final Pattern ANY_ANCHOR = Pattern.compile("<a\\b[^>]*>(?:</a>)?", Pattern.CASE_INSENSITIVE);
     private static final Pattern FENCE = Pattern.compile("^ {0,3}(`{3,}|~{3,})");
+    private static final Pattern REQUIREMENT = Pattern.compile("^ {0,3}###\\s+Requirement:(.*)$");
+    private static final Pattern DELTA_SECTION = Pattern.compile("^ {0,3}##\\s+(ADDED|MODIFIED|REMOVED|RENAMED)\\s+Requirements\\s*$");
+    private static final Pattern SECTION = Pattern.compile("^ {0,3}##\\s");
 
     private Specs() { }
 
     /** All capability specs below {@code openspecDir/specs/} and {@code openspecDir/changes/<change>/specs/}, archive excluded. */
     public static List<SpecFile> discover(Path openspecDir) {
         List<Path> roots = new ArrayList<>();
-        roots.add(openspecDir.resolve("specs"));
+        Path living = openspecDir.resolve("specs");
+        roots.add(living);
         Path changes = openspecDir.resolve("changes");
         if (Files.isDirectory(changes)) {
             try (Stream<Path> dirs = Files.list(changes)) {
@@ -52,7 +64,8 @@ public final class Specs {
                 for (Path file : files.filter(f -> f.getFileName().toString().equals("spec.md")).sorted().toList()) {
                     Path dir = root.relativize(file.getParent());
                     if (dir.toString().isEmpty()) continue;
-                    specs.add(new SpecFile(dir.toString().replace('\\', '/'), file, parse(Files.readAllLines(file))));
+                    Parsed parsed = parse(Files.readAllLines(file));
+                    specs.add(new SpecFile(dir.toString().replace('\\', '/'), file, root.equals(living), parsed.scenarios(), parsed.superseded()));
                 }
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
@@ -61,10 +74,13 @@ public final class Specs {
         return specs;
     }
 
-    /** The scenario headings of a spec's lines, skipping fenced code blocks. */
-    public static List<Scenario> parse(List<String> lines) {
+    /** The scenario headings and superseded requirements of a spec's lines, skipping fenced code blocks. */
+    public static Parsed parse(List<String> lines) {
         List<Scenario> scenarios = new ArrayList<>();
+        Set<String> superseded = new LinkedHashSet<>();
         String fence = null;
+        String section = null;
+        String requirement = null;
         for (int i = 0; i < lines.size(); i++) {
             String text = lines.get(i);
             Matcher fenceMatch = FENCE.matcher(text);
@@ -75,18 +91,40 @@ public final class Specs {
                 continue;
             }
             if (fence != null) continue;
+            Matcher delta = DELTA_SECTION.matcher(text);
+            if (delta.find()) {
+                section = delta.group(1);
+                requirement = null;
+                continue;
+            }
+            if (SECTION.matcher(text).find()) {
+                section = null;
+                requirement = null;
+                continue;
+            }
+            Matcher requirementMatch = REQUIREMENT.matcher(text);
+            if (requirementMatch.find()) {
+                requirement = requirementName(requirementMatch.group(1));
+                if ("REMOVED".equals(section) || "MODIFIED".equals(section)) superseded.add(requirement);
+                continue;
+            }
             Matcher prefix = SCENARIO_PREFIX.matcher(text);
-            if (prefix.find()) scenarios.add(parseScenario(i + 1, text, prefix.end()));
+            if (prefix.find() && !"REMOVED".equals(section)) scenarios.add(parseScenario(i + 1, text, prefix.end(), requirement));
         }
-        return scenarios;
+        return new Parsed(scenarios, superseded);
     }
 
-    private static Scenario parseScenario(int line, String text, int nameStart) {
+    /** OpenSpec matches requirement names ignoring differences in whitespace. */
+    static String requirementName(String text) {
+        return text.trim().replaceAll("\\s+", " ");
+    }
+
+    private static Scenario parseScenario(int line, String text, int nameStart, String requirement) {
         long anchors = ANY_ANCHOR.matcher(text).results().count();
         Matcher slug = SLUG_ANCHOR.matcher(text);
         if (anchors == 1 && slug.find()) {
-            return new Scenario(line, text.substring(nameStart, slug.start(1)).trim(), slug.group(2), false);
+            return new Scenario(line, text.substring(nameStart, slug.start(1)).trim(), slug.group(2), false, requirement);
         }
-        return new Scenario(line, text.substring(nameStart).trim(), null, anchors > 0);
+        return new Scenario(line, text.substring(nameStart).trim(), null, anchors > 0, requirement);
     }
 }

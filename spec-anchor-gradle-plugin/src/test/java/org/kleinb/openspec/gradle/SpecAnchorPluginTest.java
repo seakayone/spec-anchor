@@ -134,7 +134,7 @@ class SpecAnchorPluginTest {
         write("openspec/changes/archive/2026-01-01-add-login/specs/user-auth/spec.md", VALID);
         test("LoginTest", "@OpenSpec(capability = \"user-auth\", scenario = \"valid-credentials\")");
 
-        String output = runner("specAnchorCheck").build().getOutput();
+        String output = runner("specAnchorCheck").buildAndFail().getOutput();
 
         assertTrue(output.contains("unknown-reference sample.LoginTest#test: unknown capability 'user-auth'"), output);
         assertFalse(output.contains("untested-scenario"), output);
@@ -210,7 +210,7 @@ class SpecAnchorPluginTest {
         javaProject("openspecDir = file(\"no-such-dir\")");
         test("LoginTest", "@OpenSpec(capability = \"user-auth\")");
 
-        BuildResult result = runner("specAnchorCheck").build();
+        BuildResult result = runner("specAnchorCheck").buildAndFail();
 
         assertTrue(result.getOutput().contains("unknown-reference sample.LoginTest#test: unknown capability 'user-auth'"), result.getOutput());
         assertTrue(result.getOutput().contains("spec-anchor: 1 unknown-reference\n"), result.getOutput());
@@ -232,9 +232,16 @@ class SpecAnchorPluginTest {
         return kinds.stream().sorted().map(kind -> count(kind) + " " + kind.id).collect(Collectors.joining(", "));
     }
 
-    /** A project whose findings are exactly [found] (see {@link #count}), with the toggles of [failOn] set to true. */
-    void project(Set<Kind> found, Set<Kind> failOn) throws IOException {
-        javaProject(failOn.stream().map(kind -> toggle(kind) + " = true").collect(Collectors.joining("\n")));
+    static final Set<Kind> DEFAULT_FAIL_ON = EnumSet.of(Kind.INVALID_SLUG, Kind.DUPLICATE_SLUG, Kind.UNKNOWN_REFERENCE);
+
+    /** A {@code specAnchor { }} body setting every toggle explicitly: true for [failOn], false for the others. */
+    static String toggles(Set<Kind> failOn) {
+        return Arrays.stream(Kind.values()).map(kind -> toggle(kind) + " = " + failOn.contains(kind)).collect(Collectors.joining("\n"));
+    }
+
+    /** A project whose findings are exactly [found] (see {@link #count}), with [specAnchor] as its {@code specAnchor { }} body. */
+    void project(Set<Kind> found, String specAnchor) throws IOException {
+        javaProject(specAnchor);
         StringBuilder spec = new StringBuilder("# user-auth\n\n#### Scenario: Covered <a id=\"covered\"></a>\n");
         List<String> links = new ArrayList<>(List.of("@OpenSpec(capability = \"user-auth\", scenario = \"covered\")"));
         if (found.contains(Kind.UNTESTED_SCENARIO)) spec.append("#### Scenario: Untested <a id=\"untested\"></a>\n");
@@ -245,13 +252,24 @@ class SpecAnchorPluginTest {
             links.add("@OpenSpec(capability = \"user-auth\", scenario = \"dup\")");
         }
         if (found.contains(Kind.UNKNOWN_REFERENCE)) links.add("@OpenSpec(capability = \"no-such-capability\")");
+        if (found.contains(Kind.REMOVED_REFERENCE)) {
+            // last, so that no other scenario lands below the removed requirement
+            spec.append("### Requirement: Old\n#### Scenario: Old <a id=\"old\"></a>\n");
+            write("openspec/changes/drop-old/specs/user-auth/spec.md", "## REMOVED Requirements\n\n### Requirement: Old\n**Reason**: gone\n");
+            links.add("@OpenSpec(capability = \"user-auth\", scenario = \"old\")");
+        }
         write("openspec/specs/user-auth/spec.md", spec.toString());
         test("LoginTest", String.join("\n    ", links));
     }
 
-    /** Runs the check on {@link #project}([found], [failOn]) and asserts it fails exactly on the enabled kinds found. */
+    /** Runs the check with every toggle set explicitly and asserts it fails exactly on the kinds of [failOn] found. */
     void assertCheck(Set<Kind> found, Set<Kind> failOn) throws IOException {
-        project(found, failOn);
+        assertCheck(found, failOn, toggles(failOn));
+    }
+
+    /** Runs the check on {@link #project}([found], [specAnchor]) and asserts it fails exactly on the kinds of [failOn] found. */
+    void assertCheck(Set<Kind> found, Set<Kind> failOn, String specAnchor) throws IOException {
+        project(found, specAnchor);
         Set<Kind> failing = EnumSet.noneOf(Kind.class);
         failing.addAll(found);
         failing.retainAll(failOn);
@@ -273,9 +291,23 @@ class SpecAnchorPluginTest {
     }
 
     @Test
-    @OpenSpec(capability = "build-spec-check", scenario = "reports-only-by-default")
-    void reportsOnlyByDefault() throws IOException {
-        assertCheck(EnumSet.allOf(Kind.class), EnumSet.noneOf(Kind.class));
+    @OpenSpec(capability = "build-spec-check", scenario = "default-fails-on-mistakes")
+    void defaultFailsOnMistakes() throws IOException {
+        assertCheck(EnumSet.allOf(Kind.class), DEFAULT_FAIL_ON, "");
+    }
+
+    @ParameterizedTest
+    @EnumSource(Kind.class)
+    @OpenSpec(capability = "build-spec-check", scenario = "default-toggles-per-kind")
+    void defaultTogglesPerKind(Kind kind) throws IOException {
+        assertCheck(EnumSet.of(kind), DEFAULT_FAIL_ON, "");
+    }
+
+    @Test
+    @OpenSpec(capability = "build-spec-check", scenario = "defaults-can-be-turned-off")
+    void defaultsCanBeTurnedOff() throws IOException {
+        assertCheck(EnumSet.allOf(Kind.class), EnumSet.noneOf(Kind.class),
+            "failOnInvalidSlug = false\nfailOnDuplicateSlug = false\nfailOnUnknownReference = false");
     }
 
     @ParameterizedTest
@@ -312,15 +344,16 @@ class SpecAnchorPluginTest {
     }
 
     /**
-     * All 32 x 32 combinations of toggles and found kinds, i.e. 1024 builds. Too slow for every build, so it only runs
-     * with {@code -PspecAnchor.shard=k/n}, which runs the combinations whose index modulo n is k ({@code 0/1} for all).
+     * All combinations of toggles and found kinds (64 x 64 = 4096 builds for six kinds). Too slow for every build, so it
+     * only runs with {@code -PspecAnchor.shard=k/n}, which runs the combinations whose index modulo n is k ({@code 0/1} for all).
      */
     static Stream<Arguments> combinations() {
         String shard = System.getProperty("specAnchor.shard", "");
         if (!shard.matches("\\d+/\\d+")) return Stream.empty();
         int k = Integer.parseInt(shard.split("/")[0]);
         int n = Integer.parseInt(shard.split("/")[1]);
-        return IntStream.range(0, 32 * 32).filter(i -> i % n == k).mapToObj(i -> Arguments.of(kinds(i / 32), kinds(i % 32)));
+        int subsets = 1 << Kind.values().length;
+        return IntStream.range(0, subsets * subsets).filter(i -> i % n == k).mapToObj(i -> Arguments.of(kinds(i / subsets), kinds(i % subsets)));
     }
 
     @ParameterizedTest(name = "failOn={0} found={1}")

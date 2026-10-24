@@ -13,8 +13,10 @@ Today, spec–test gaps are visible only in IntelliJ: untested scenarios, missin
   - invalid slug anchors
   - duplicate slugs within one `spec.md`
   - `@OpenSpec` references to an unknown capability or scenario slug
+  - `@OpenSpec` references to a scenario that an active change removes
+- Requirements that an active change lists as `REMOVED` or `MODIFIED` supersede the living version, so findings describe the specs as they will be after the change.
 - Findings are printed to the build output and written to a report file.
-- A `specAnchor { }` extension has one `failOn…` toggle per finding kind. All toggles are off by default, so the task only reports until a project opts in.
+- A `specAnchor { }` extension has one `failOn…` toggle per finding kind. `failOnInvalidSlug`, `failOnDuplicateSlug` and `failOnUnknownReference` are on by default, since those findings are always mistakes. The two that are normal while a change is being written, untested scenarios and missing slugs, are off.
 - The plugin and its plugin marker artifact are published to Maven Central with the annotation library, in the same release.
 - Docs gain a Gradle plugin page and installation instructions.
 - Out of scope: a Maven plugin (planned for a later change), and aggregating tests across several Gradle subprojects.

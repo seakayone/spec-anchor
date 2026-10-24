@@ -34,11 +34,45 @@ The task SHALL read every `spec.md` below `<openspecDir>/specs/` and below `<ope
 
 #### Scenario: Missing openspec directory <a id="missing-openspec-dir"></a>
 - **WHEN** `openspecDir` points to a directory that does not exist and a test is annotated `@OpenSpec(capability = "user-auth")`
-- **THEN** the task reports that annotation as an unknown reference and no spec findings, and succeeds
+- **THEN** the task reports that annotation as an unknown reference and no spec findings
 
 #### Scenario: Heading in a code block <a id="ignores-code-blocks"></a>
 - **WHEN** a `#### Scenario:` line appears inside a fenced code block in a `spec.md`
 - **THEN** it is not treated as a scenario
+
+### Requirement: Active changes supersede living requirements
+A requirement that an active change lists under `## REMOVED Requirements` or `## MODIFIED Requirements` SHALL be superseded: the scenarios under that `### Requirement:` in the living spec of the same capability SHALL get no findings and SHALL NOT resolve references. Requirement names SHALL match ignoring differences in whitespace. A `MODIFIED` requirement's scenarios in the change spec count instead. Scenarios inside a `REMOVED` section SHALL be ignored.
+
+#### Scenario: Removed requirement <a id="removed-scenarios-not-reported"></a>
+- **WHEN** the living spec of `user-auth` has `### Requirement: Legacy login` with an untested scenario `legacy`, and an active change's spec lists `### Requirement: Legacy login` under `## REMOVED Requirements`
+- **THEN** no finding is reported for the scenario `legacy`
+
+#### Scenario: Modified requirement replaces the living one <a id="modified-requirement-replaces-living"></a>
+- **WHEN** the living spec has `### Requirement: Login` with an untested scenario `valid-credentials`, and an active change's spec repeats `### Requirement: Login` with that scenario under `## MODIFIED Requirements`
+- **THEN** exactly one untested-scenario finding is reported for `valid-credentials`, at the change spec's line
+
+#### Scenario: Requirement names match ignoring whitespace <a id="requirement-names-match-loosely"></a>
+- **WHEN** the living spec says `### Requirement: Legacy  login` and the change removes `### Requirement: Legacy login`
+- **THEN** the living requirement is superseded
+
+#### Scenario: Other requirements stay <a id="unaffected-requirements-checked"></a>
+- **WHEN** an active change removes `Legacy login` and the living spec also has `### Requirement: Login` with an untested scenario
+- **THEN** that scenario is still reported as untested
+
+### Requirement: References to removed scenarios are reported
+The task SHALL report every `@OpenSpec` whose `scenario` matches no slug of a scenario that is not superseded, but matches the slug of a superseded scenario of that capability, as a removed reference instead of an unknown reference.
+
+#### Scenario: Test linked to a removed scenario <a id="reports-removed-reference"></a>
+- **WHEN** an active change removes the requirement holding scenario `legacy` and a test is annotated with `user-auth` and `scenario = "legacy"`
+- **THEN** a removed-reference finding names the test and the slug, and no unknown-reference finding is reported for it
+
+#### Scenario: Scenario dropped by a modification <a id="modified-drops-scenario"></a>
+- **WHEN** the living `### Requirement: Login` has the scenarios `a` and `b`, an active change modifies it keeping only `a`, and a test links to `b`
+- **THEN** a removed-reference finding is reported for the link to `b`
+
+#### Scenario: Slug still present <a id="kept-scenario-not-removed"></a>
+- **WHEN** an active change modifies `### Requirement: Login` and keeps its scenario `a`, and a test links to `a`
+- **THEN** no removed-reference or unknown-reference finding is reported
 
 ### Requirement: Links are read from compiled test classes
 The task SHALL read every `@OpenSpec` on test classes and test methods, including repeated annotations, from the compiled test classes, whether the tests are written in Java or Kotlin.
@@ -126,10 +160,18 @@ The task SHALL print each finding on its own line with its kind, location and me
 - **THEN** the task prints that there are no findings and succeeds
 
 ### Requirement: The build fails only on the finding kinds the project selects
-The `specAnchor` extension SHALL offer `failOnUntestedScenario`, `failOnMissingSlug`, `failOnInvalidSlug`, `failOnDuplicateSlug` and `failOnUnknownReference`, all `false` by default. The task SHALL fail after reporting all findings when at least one finding has a kind whose toggle is `true`, and SHALL name those kinds and their counts in the failure message.
+The `specAnchor` extension SHALL offer `failOnUntestedScenario`, `failOnMissingSlug`, `failOnInvalidSlug`, `failOnDuplicateSlug`, `failOnUnknownReference` and `failOnRemovedReference`. `failOnInvalidSlug`, `failOnDuplicateSlug` and `failOnUnknownReference` SHALL default to `true`, the other three to `false`. The task SHALL fail after reporting all findings when at least one finding has a kind whose toggle is `true`, and SHALL name those kinds and their counts in the failure message.
 
-#### Scenario: Default configuration only reports <a id="reports-only-by-default"></a>
-- **WHEN** no toggle is set and the check finds findings of all five kinds
+#### Scenario: Default configuration fails on mistakes <a id="default-fails-on-mistakes"></a>
+- **WHEN** no toggle is set and the check finds findings of all six kinds
+- **THEN** all findings are reported and the task fails with a message naming the invalid slug, duplicate slug and unknown reference findings, and not the untested scenario, missing slug or removed reference
+
+#### Scenario: Each kind alone with the defaults <a id="default-toggles-per-kind"></a>
+- **WHEN** no toggle is set and the only finding is of one kind
+- **THEN** the task fails for `invalid-slug`, `duplicate-slug` and `unknown-reference`, and succeeds for `untested-scenario`, `missing-slug` and `removed-reference`
+
+#### Scenario: Defaults turned off <a id="defaults-can-be-turned-off"></a>
+- **WHEN** the build sets `failOnInvalidSlug`, `failOnDuplicateSlug` and `failOnUnknownReference` to `false` and the check finds findings of all six kinds
 - **THEN** the findings are reported and the task succeeds
 
 #### Scenario: Enabled kind fails the build <a id="fails-on-enabled-kind"></a>
@@ -149,5 +191,5 @@ The `specAnchor` extension SHALL offer `failOnUntestedScenario`, `failOnMissingS
 - **THEN** the task succeeds
 
 #### Scenario: Any combination of toggles and findings <a id="fails-only-on-enabled-found-kinds"></a>
-- **WHEN** any subset of the five toggles is `true` and any subset of the five kinds is found
+- **WHEN** every toggle is set explicitly, any subset of them to `true`, and any subset of the six kinds is found
 - **THEN** the task fails exactly when an enabled kind is found, and the message names exactly the enabled kinds that were found

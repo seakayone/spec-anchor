@@ -20,10 +20,27 @@ public final class Checker {
 
     /** Findings for [specs] and [links]; spec locations are relative to [base]. */
     public static List<Finding> check(List<SpecFile> specs, List<Link> links, Path base) {
-        Map<String, Set<String>> slugs = new HashMap<>();
+        // requirements that an active change removes or modifies, per capability; their living scenarios are superseded
+        Map<String, Set<String>> superseded = new HashMap<>();
         for (SpecFile spec : specs) {
+            if (!spec.living()) superseded.computeIfAbsent(spec.capability(), c -> new HashSet<>()).addAll(spec.superseded());
+        }
+        Map<SpecFile, List<Scenario>> active = new HashMap<>();
+        Map<String, Set<String>> slugs = new HashMap<>();
+        Map<String, Set<String>> supersededSlugs = new HashMap<>();
+        for (SpecFile spec : specs) {
+            Set<String> capabilitySuperseded = superseded.getOrDefault(spec.capability(), Set.of());
+            List<Scenario> scenarios = new ArrayList<>();
+            for (Scenario scenario : spec.scenarios()) {
+                if (spec.living() && scenario.requirement() != null && capabilitySuperseded.contains(scenario.requirement())) {
+                    if (scenario.slug() != null) supersededSlugs.computeIfAbsent(spec.capability(), c -> new HashSet<>()).add(scenario.slug());
+                } else {
+                    scenarios.add(scenario);
+                }
+            }
+            active.put(spec, scenarios);
             Set<String> capabilitySlugs = slugs.computeIfAbsent(spec.capability(), c -> new HashSet<>());
-            spec.scenarios().stream().map(Scenario::slug).filter(Objects::nonNull).forEach(capabilitySlugs::add);
+            scenarios.stream().map(Scenario::slug).filter(Objects::nonNull).forEach(capabilitySlugs::add);
         }
         Set<String> tested = links.stream()
             .filter(link -> !link.scenario().isEmpty())
@@ -33,10 +50,10 @@ public final class Checker {
         List<Finding> findings = new ArrayList<>();
         for (SpecFile spec : specs) {
             String path = base.relativize(spec.path()).toString().replace('\\', '/');
-            Map<String, Long> slugCounts = spec.scenarios().stream()
+            Map<String, Long> slugCounts = active.get(spec).stream()
                 .map(Scenario::slug).filter(Objects::nonNull)
                 .collect(Collectors.groupingBy(s -> s, Collectors.counting()));
-            for (Scenario scenario : spec.scenarios()) {
+            for (Scenario scenario : active.get(spec)) {
                 String location = path + ":" + scenario.line();
                 if (scenario.invalidAnchor()) {
                     findings.add(new Finding(Kind.INVALID_SLUG, location, "scenario '" + scenario.name() + "' has an invalid slug anchor"));
@@ -57,7 +74,12 @@ public final class Checker {
             if (capabilitySlugs == null) {
                 findings.add(new Finding(Kind.UNKNOWN_REFERENCE, link.test(), "unknown capability '" + link.capability() + "'"));
             } else if (!link.scenario().isEmpty() && !capabilitySlugs.contains(link.scenario())) {
-                findings.add(new Finding(Kind.UNKNOWN_REFERENCE, link.test(), "unknown scenario '" + link.scenario() + "' in capability '" + link.capability() + "'"));
+                if (supersededSlugs.getOrDefault(link.capability(), Set.of()).contains(link.scenario())) {
+                    findings.add(new Finding(Kind.REMOVED_REFERENCE, link.test(),
+                        "scenario '" + link.scenario() + "' in capability '" + link.capability() + "' is removed by an active change"));
+                } else {
+                    findings.add(new Finding(Kind.UNKNOWN_REFERENCE, link.test(), "unknown scenario '" + link.scenario() + "' in capability '" + link.capability() + "'"));
+                }
             }
         }
         return findings;

@@ -134,4 +134,86 @@ class CheckerTest {
             new Link("LoginTest#valid", "user-auth", "valid-credentials"),
             new Link("LoginTest#change", "user-auth", "in-change")));
     }
+
+    // --- active changes supersede living requirements --------------------------------------------------------------
+
+    private static final String LIVING = """
+        ## Requirements
+
+        ### Requirement: Login
+        #### Scenario: A <a id="a"></a>
+        #### Scenario: B <a id="b"></a>
+
+        ### Requirement: Legacy  login
+        #### Scenario: Legacy <a id="legacy"></a>
+        """;
+
+    private static final String CHANGE = "openspec/changes/drop-legacy/specs/user-auth/spec.md";
+
+    private static final String REMOVE_LEGACY = """
+        ## REMOVED Requirements
+
+        ### Requirement: Legacy login
+        **Reason**: replaced
+        **Migration**: use Login
+        """;
+
+    @Test
+    @OpenSpec(capability = "build-spec-check", scenario = "removed-scenarios-not-reported")
+    @OpenSpec(capability = "build-spec-check", scenario = "requirement-names-match-loosely")
+    void removedScenariosNotReported() throws IOException {
+        spec(USER_AUTH, LIVING);
+        spec(CHANGE, REMOVE_LEGACY);
+
+        assertEquals(List.of(), findings(new Link("T#a", "user-auth", "a"), new Link("T#b", "user-auth", "b")));
+    }
+
+    @Test
+    @OpenSpec(capability = "build-spec-check", scenario = "unaffected-requirements-checked")
+    void unaffectedRequirementsChecked() throws IOException {
+        spec(USER_AUTH, LIVING);
+        spec(CHANGE, REMOVE_LEGACY);
+
+        assertEquals(List.of("untested-scenario openspec/specs/user-auth/spec.md:5: no test linked to scenario 'b'"),
+            findings(new Link("T#a", "user-auth", "a")));
+    }
+
+    @Test
+    @OpenSpec(capability = "build-spec-check", scenario = "modified-requirement-replaces-living")
+    void modifiedRequirementReplacesLiving() throws IOException {
+        spec(USER_AUTH, "### Requirement: Login\n#### Scenario: Valid <a id=\"valid-credentials\"></a>\n");
+        spec(CHANGE, "## MODIFIED Requirements\n\n### Requirement: Login\n#### Scenario: Valid <a id=\"valid-credentials\"></a>\n");
+
+        assertEquals(List.of("untested-scenario openspec/changes/drop-legacy/specs/user-auth/spec.md:4: no test linked to scenario 'valid-credentials'"),
+            findings());
+    }
+
+    @Test
+    @OpenSpec(capability = "build-spec-check", scenario = "reports-removed-reference")
+    void reportsRemovedReference() throws IOException {
+        spec(USER_AUTH, LIVING);
+        spec(CHANGE, REMOVE_LEGACY);
+
+        assertEquals(List.of("removed-reference T#legacy: scenario 'legacy' in capability 'user-auth' is removed by an active change"),
+            findings(new Link("T#a", "user-auth", "a"), new Link("T#b", "user-auth", "b"), new Link("T#legacy", "user-auth", "legacy")));
+    }
+
+    @Test
+    @OpenSpec(capability = "build-spec-check", scenario = "modified-drops-scenario")
+    @OpenSpec(capability = "build-spec-check", scenario = "kept-scenario-not-removed")
+    void modifiedDropsScenario() throws IOException {
+        spec(USER_AUTH, LIVING);
+        spec(CHANGE, "## MODIFIED Requirements\n\n### Requirement: Login\n#### Scenario: A <a id=\"a\"></a>\n");
+
+        assertEquals(List.of("removed-reference T#b: scenario 'b' in capability 'user-auth' is removed by an active change"),
+            findings(new Link("T#a", "user-auth", "a"), new Link("T#b", "user-auth", "b"), new Link("T#legacy", "user-auth", "legacy")));
+    }
+
+    @Test
+    void scenariosInRemovedSectionAreIgnored() throws IOException {
+        spec(USER_AUTH, LIVING);
+        spec(CHANGE, REMOVE_LEGACY + "#### Scenario: Leftover\n");
+
+        assertEquals(List.of(), findings(new Link("T#a", "user-auth", "a"), new Link("T#b", "user-auth", "b")));
+    }
 }
