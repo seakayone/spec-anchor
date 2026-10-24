@@ -5,11 +5,11 @@ context: |
   - Build: Gradle 9 multi-project, Kotlin DSL, version catalog (gradle/libs.versions.toml), committed wrapper
   - Toolchain: JDK 21 and Gradle managed via mise (mise.toml)
   - openspec-annotations: plain Java library, compiled with --release 8, no runtime dependencies,
-    package org.kleinb.openspec.annotation, tests with JUnit 5
+    package org.kleinb.openspec.annotation, tests with JUnit 6 (Jupiter); tests compile on Java 21
   - openspec-intellij-plugin: Kotlin on JVM 21, IntelliJ Platform Gradle Plugin 2.x,
     targets IntelliJ IDEA 2025.2+ (sinceBuild 252), depends on bundled com.intellij.java and
     org.intellij.plugins.markdown, package org.kleinb.openspec.intellij, plugin ID org.kleinb.openspec,
-    tests with the IntelliJ platform test framework (light fixtures, JUnit vintage engine)
+    tests with the IntelliJ platform test framework (light fixtures, run on plain JUnit 4)
 
 # Project context (optional)
 # Add only constraints that should guide OpenSpec artifacts and workflows.
