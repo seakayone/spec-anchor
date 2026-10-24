@@ -10,7 +10,7 @@ You need two things: the annotation library on your test classpath, and the plug
 
 ```kotlin
 dependencies {
-    testImplementation("org.kleinb.openspec:spec-anchor-annotations:0.2.0")
+    testImplementation("org.kleinb.openspec:spec-anchor-annotations:0.3.0")
 }
 ```
 
@@ -18,7 +18,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    testImplementation 'org.kleinb.openspec:spec-anchor-annotations:0.2.0'
+    testImplementation 'org.kleinb.openspec:spec-anchor-annotations:0.3.0'
 }
 ```
 
@@ -28,7 +28,7 @@ dependencies {
 <dependency>
     <groupId>org.kleinb.openspec</groupId>
     <artifactId>spec-anchor-annotations</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <scope>test</scope>
 </dependency>
 ```
