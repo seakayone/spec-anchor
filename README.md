@@ -49,7 +49,7 @@ Requires JDK 21 (`mise install` sets up JDK and Gradle from `mise.toml`).
 
 ## Release
 
-`just release` publishes `spec-anchor-annotations` to Maven Central and creates the GitHub release (`just release-dry` rehearses it). Credentials go in `~/.jreleaser/config.properties` (`JRELEASER_GITHUB_TOKEN`, `JRELEASER_MAVENCENTRAL_USERNAME`, `JRELEASER_MAVENCENTRAL_PASSWORD`), signing keys in `~/.jreleaser/public.pgp` and `private.pgp`; `just publish --check` verifies them.
+`just release` publishes `spec-anchor-annotations` to Maven Central and creates the GitHub release with the plugin zip attached (`just release-dry` rehearses it). Credentials go in `~/.jreleaser/config.properties` (`JRELEASER_GITHUB_TOKEN`, `JRELEASER_MAVENCENTRAL_USERNAME`, `JRELEASER_MAVENCENTRAL_PASSWORD`), signing keys in `~/.jreleaser/public.pgp` and `private.pgp`; `just publish --check` verifies them.
 
 ## License
 

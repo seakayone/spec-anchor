@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Usage: scripts/publish.sh [--check | --notes [version] | --github-only | <jreleaser args, e.g. --dry-run>]
 # Stages spec-anchor-annotations with Gradle, deploys to Maven Central with the JReleaser CLI and
-# creates the GitHub release with gh.
+# creates the GitHub release with gh, with the IntelliJ plugin zip attached.
 #   --check        only verify that tools, credentials and signing keys are available
 #   --github-only  only create the GitHub release (recovery after Central succeeded)
 #   --notes [ver]  print the release notes for a version (default: version.txt) and exit
@@ -62,9 +62,14 @@ export JRELEASER_PROJECT_VERSION="$version"
 export JRELEASER_GPG_PUBLIC_KEY="${JRELEASER_GPG_PUBLIC_KEY:-$HOME/.jreleaser/public.pgp}"
 export JRELEASER_GPG_SECRET_KEY="${JRELEASER_GPG_SECRET_KEY:-$HOME/.jreleaser/private.pgp}"
 
+plugin_zip="spec-anchor-intellij-plugin/build/distributions/spec-anchor-intellij-plugin-$version.zip"
+
 create_github_release() {
-  gh release view "v$version" >/dev/null 2>&1 && return 0
-  gh release create "v$version" --title "v$version" --verify-tag --notes-file "$notes"
+  if gh release view "v$version" >/dev/null 2>&1; then
+    gh release upload "v$version" "$plugin_zip" --clobber
+  else
+    gh release create "v$version" "$plugin_zip" --title "v$version" --verify-tag --notes-file "$notes"
+  fi
 }
 
 print_summary() { # <heading>
@@ -73,6 +78,7 @@ print_summary() { # <heading>
   printf '\n===== %s =====\n' "$1"
   printf 'Version:        %s (tag v%s)\n' "$version" "$version"
   printf 'GitHub release: %s/releases/tag/v%s\n' "$repo_url" "$version"
+  printf 'Plugin zip:     %s\n' "$plugin_zip"
   printf 'Maven Central:  https://central.sonatype.com/artifact/org.kleinb.openspec/spec-anchor-annotations/%s\n' "$version"
   printf '\nRelease notes:\n\n'
   cat "$notes"
@@ -82,12 +88,13 @@ print_summary() { # <heading>
 generate_notes "$version"
 
 if [[ "$mode" == "--github-only" ]]; then
+  ./gradlew :spec-anchor-intellij-plugin:buildPlugin
   create_github_release
   print_summary "release summary"
   exit 0
 fi
 
-./gradlew :spec-anchor-annotations:publish
+./gradlew :spec-anchor-annotations:publish :spec-anchor-intellij-plugin:buildPlugin
 jreleaser deploy --git-root-search "$@"
 
 # The native JReleaser CLI cannot create tags (JGit fails under GraalVM), so release.sh
