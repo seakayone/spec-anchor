@@ -38,3 +38,7 @@ Requires JDK 21 (`mise install` sets up JDK and Gradle from `mise.toml`).
 ./gradlew :spec-anchor-intellij-plugin:buildPlugin      # plugin zip in spec-anchor-intellij-plugin/build/distributions
 ./gradlew :spec-anchor-intellij-plugin:runIde           # try the plugin in a sandbox IDE
 ```
+
+## License
+
+[Apache License 2.0](LICENSE)
