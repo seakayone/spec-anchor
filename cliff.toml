@@ -1,0 +1,11 @@
+# Used by scripts/release.sh to suggest the next version from conventional commits.
+[bump]
+features_always_bump_minor = true
+# While on 0.x a breaking change bumps the minor version; release 1.0.0 deliberately.
+breaking_always_bump_major = false
+initial_tag = "0.0.1"
+
+[git]
+conventional_commits = true
+filter_unconventional = false
+tag_pattern = "v[0-9].*"

@@ -1,11 +1,14 @@
 plugins {
     `java-library`
+    `maven-publish`
 }
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+    withJavadocJar()
+    withSourcesJar()
 }
 
 repositories {
@@ -26,4 +29,42 @@ tasks.compileJava {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+
+            pom {
+                name = "spec-anchor-annotations"
+                description = "Annotation that links Java tests to OpenSpec scenarios"
+                url = "https://github.com/seakayone/spec-anchor"
+                inceptionYear = "2026"
+                licenses {
+                    license {
+                        name = "Apache-2.0"
+                        url = "https://spdx.org/licenses/Apache-2.0.html"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "seakayone"
+                        name = "Christian Kleinbölting"
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://github.com/seakayone/spec-anchor"
+                    developerConnection = "scm:git:ssh://github.com/seakayone/spec-anchor.git"
+                    url = "https://github.com/seakayone/spec-anchor"
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url = uri(layout.buildDirectory.dir("staging-deploy"))
+        }
+    }
 }

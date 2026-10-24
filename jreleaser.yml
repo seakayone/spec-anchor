@@ -1,0 +1,45 @@
+project:
+  name: spec-anchor
+  description: Link Java tests to OpenSpec scenarios
+  longDescription: Annotation that links Java tests to OpenSpec scenarios, with an IntelliJ IDEA plugin for navigating between them
+  links:
+    homepage: https://github.com/seakayone/spec-anchor
+  authors:
+    - Christian Kleinbölting
+  license: APACHE-2.0
+  inceptionYear: 2026
+  stereotype: NONE
+  languages:
+    java:
+      version: 8
+      groupId: org.kleinb.openspec
+      artifactId: spec-anchor-annotations
+
+release:
+  github:
+    overwrite: true
+    changelog:
+      formatted: ALWAYS
+      preset: conventional-commits
+      labelers:
+        - label: release
+          title: 'regex:^chore: release '
+      excludeLabels:
+        - release
+      contributors:
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
+
+signing:
+  active: ALWAYS
+  pgp:
+    armored: true
+    mode: FILE
+
+deploy:
+  maven:
+    mavenCentral:
+      release-deploy:
+        active: RELEASE
+        url: https://central.sonatype.com/api/v1/publisher
+        stagingRepositories:
+          - spec-anchor-annotations/build/staging-deploy

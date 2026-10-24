@@ -5,5 +5,5 @@ plugins {
 
 allprojects {
     group = "org.kleinb.openspec"
-    version = "0.1.0-SNAPSHOT"
+    version = rootProject.file("version.txt").readText().trim()
 }

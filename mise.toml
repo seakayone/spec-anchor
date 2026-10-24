@@ -1,3 +1,7 @@
 [tools]
 java = "21"
 gradle = "9"
+gh = "2.102.0"
+git-cliff = "2.14.2"
+jreleaser = "1.26.0"
+just = "latest"
