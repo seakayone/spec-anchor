@@ -33,7 +33,7 @@ dependencies {
     }
     testImplementation(libs.junit4)
     testImplementation(libs.opentest4j)
-    testImplementation(project(":openspec-annotations"))
+    testImplementation(project(":spec-anchor-annotations"))
 }
 
 intellijPlatform {

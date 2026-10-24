@@ -1,11 +1,11 @@
-# open-spec-plugin
+# spec-anchor
 
 Links Java tests to [OpenSpec](https://github.com/Fission-AI/OpenSpec) scenarios and lets you navigate between them in IntelliJ IDEA.
 
 ## Modules
 
-- `openspec-annotations` – the `@OpenSpec` annotation (Java 8+, no dependencies).
-- `openspec-intellij-plugin` – IntelliJ IDEA 2025.2+ plugin: gutter navigation between `spec.md` scenarios and annotated tests, Ctrl+Click from the annotation to the spec, and highlighting of unknown references, invalid or duplicate slugs, and untested scenarios.
+- `spec-anchor-annotations` – the `@OpenSpec` annotation (Java 8+, no dependencies).
+- `spec-anchor-intellij-plugin` – IntelliJ IDEA 2025.2+ plugin: gutter navigation between `spec.md` scenarios and annotated tests, Ctrl+Click from the annotation to the spec, and highlighting of unknown references, invalid or duplicate slugs, and untested scenarios.
 
 ## Linking a test to a scenario
 
@@ -35,6 +35,6 @@ Requires JDK 21 (`mise install` sets up JDK and Gradle from `mise.toml`).
 
 ```sh
 ./gradlew build                                      # compile and test everything
-./gradlew :openspec-intellij-plugin:buildPlugin      # plugin zip in openspec-intellij-plugin/build/distributions
-./gradlew :openspec-intellij-plugin:runIde           # try the plugin in a sandbox IDE
+./gradlew :spec-anchor-intellij-plugin:buildPlugin      # plugin zip in spec-anchor-intellij-plugin/build/distributions
+./gradlew :spec-anchor-intellij-plugin:runIde           # try the plugin in a sandbox IDE
 ```

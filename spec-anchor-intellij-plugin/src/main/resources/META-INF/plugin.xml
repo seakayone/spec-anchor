@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>org.kleinb.openspec</id>
-    <name>OpenSpec Test Links</name>
+    <name>Spec Anchor</name>
     <vendor>Christian Kleinbölting</vendor>
     <description><![CDATA[
         Navigate between OpenSpec <code>spec.md</code> scenarios and the Java tests annotated with

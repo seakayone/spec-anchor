@@ -5,7 +5,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="open-spec-plugin.openspec-annotations.main" options="-Xlint:-options" />
+      <module name="spec-anchor.spec-anchor-annotations.main" options="-Xlint:-options" />
     </option>
   </component>
 </project>

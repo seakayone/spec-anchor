@@ -1,3 +1,3 @@
-rootProject.name = "open-spec-plugin"
+rootProject.name = "spec-anchor"
 
-include("openspec-annotations", "openspec-intellij-plugin")
+include("spec-anchor-annotations", "spec-anchor-intellij-plugin")
