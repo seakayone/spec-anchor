@@ -12,13 +12,17 @@ context: |
     tests with the IntelliJ platform test framework (light fixtures, run on plain JUnit 4)
 
 rules:
+  proposal:
+    - 'In Impact, name the pages under `docs/` and the `README.md` sections the change affects (or state that none are affected)'
   specs:
     - 'End every scenario heading with a slug anchor, e.g. `#### Scenario: Valid credentials <a id="valid-credentials"></a>` (lowercase a-z, 0-9, single hyphens, unique per spec.md)'
     - 'When modifying a scenario, keep its existing `<a id="..."></a>` anchor unchanged'
   tasks:
     - 'Every task that changes Java or Kotlin code includes writing or updating the tests that cover the affected scenarios, annotated with `@OpenSpec`'
+    - 'Every task group that changes user-visible behavior, configuration, installation or release includes a task to update the affected pages under `docs/` and `README.md` in the same group, verified by reading the changed pages against the new behavior'
 
 operations:
   apply:
     guidance:
       - 'Every Java or Kotlin code change MUST come with tests annotated `@OpenSpec(capability = "<path under openspec/specs/>", scenario = "<slug>")` for each scenario they verify; a change is not done while a scenario it touches has no linked test'
+      - 'Every change MUST update `docs/` and `README.md` to match what it changes (features, options, installation, versions); a change is not done while the docs describe the old behavior'

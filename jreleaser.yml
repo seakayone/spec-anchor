@@ -43,3 +43,4 @@ deploy:
         url: https://central.sonatype.com/api/v1/publisher
         stagingRepositories:
           - spec-anchor-annotations/build/staging-deploy
+          - spec-anchor-gradle-plugin/build/staging-deploy
