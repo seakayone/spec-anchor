@@ -2,6 +2,8 @@
 
 Links Java tests to [OpenSpec](https://github.com/Fission-AI/OpenSpec) scenarios and lets you navigate between them in IntelliJ IDEA.
 
+**Documentation:** [docs/](docs/README.md): [installation](docs/installation.md), [the `@OpenSpec` annotation](docs/annotation.md), [the IntelliJ plugin](docs/intellij-plugin.md).
+
 ## Modules
 
 - `spec-anchor-annotations` – the `@OpenSpec` annotation (Java 8+, no dependencies).
@@ -26,7 +28,7 @@ Maven:
 </dependency>
 ```
 
-The IntelliJ plugin (IntelliJ IDEA 2025.2 or later) is not on the JetBrains Marketplace yet. Download `spec-anchor-intellij-plugin-<version>.zip` from the [GitHub releases](https://github.com/seakayone/spec-anchor/releases), then in IntelliJ go to *Settings → Plugins → ⚙ → Install Plugin from Disk…*, pick the zip and restart the IDE if asked.
+The IntelliJ plugin (IntelliJ IDEA 2025.2 or later) is not on the JetBrains Marketplace yet. Download `spec-anchor-intellij-plugin-<version>.zip` from the [GitHub releases](https://github.com/seakayone/spec-anchor/releases), then in IntelliJ go to *Settings → Plugins → ⚙ → Install Plugin from Disk*, pick the zip and restart the IDE if asked.
 
 ## Linking a test to a scenario
 
